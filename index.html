@@ -114,6 +114,9 @@
         0 4px 15px rgba(76, 175, 80, 0.4),
         0 0 20px rgba(76, 175, 80, 0.2);
       touch-action: manipulation;
+      -webkit-tap-highlight-color: rgba(76, 175, 80, 0.3);
+      min-height: 50px;
+      min-width: 120px;
     }
 
     #restartBtn:hover, #restartBtn:active {
@@ -473,31 +476,48 @@
     // Touch control buttons
     leftBtn.addEventListener('touchstart', (e) => {
       e.preventDefault();
+      e.stopPropagation();
       keys['ArrowLeft'] = true;
     });
-    leftBtn.addEventListener('touchend', () => keys['ArrowLeft'] = false);
+    leftBtn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      keys['ArrowLeft'] = false;
+    });
 
     rightBtn.addEventListener('touchstart', (e) => {
       e.preventDefault();
+      e.stopPropagation();
       keys['ArrowRight'] = true;
     });
-    rightBtn.addEventListener('touchend', () => keys['ArrowRight'] = false);
+    rightBtn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      keys['ArrowRight'] = false;
+    });
 
     upBtn.addEventListener('touchstart', (e) => {
       e.preventDefault();
+      e.stopPropagation();
       keys['ArrowUp'] = true;
     });
-    upBtn.addEventListener('touchend', () => keys['ArrowUp'] = false);
+    upBtn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      keys['ArrowUp'] = false;
+    });
 
     downBtn.addEventListener('touchstart', (e) => {
       e.preventDefault();
+      e.stopPropagation();
       keys['ArrowDown'] = true;
     });
-    downBtn.addEventListener('touchend', () => keys['ArrowDown'] = false);
+    downBtn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      keys['ArrowDown'] = false;
+    });
 
-    // Touch screen movement (swipe)
+    // Touch screen movement (swipe) - only for canvas
     canvas.addEventListener('touchstart', (e) => {
       e.preventDefault();
+      e.stopPropagation();
       const touch = e.touches[0];
       const rect = canvas.getBoundingClientRect();
       touchStartX = touch.clientX - rect.left;
@@ -506,6 +526,7 @@
 
     canvas.addEventListener('touchmove', (e) => {
       e.preventDefault();
+      e.stopPropagation();
       if (!gameRunning) return;
       
       const touch = e.touches[0];
@@ -527,6 +548,7 @@
 
     canvas.addEventListener('touchend', (e) => {
       e.preventDefault();
+      e.stopPropagation();
     });
   }
 
@@ -1158,10 +1180,23 @@
     requestAnimationFrame(gameLoop);
   }
 
-  // Event listeners
-  restartBtn.addEventListener('click', () => {
+  // Event listeners - Mobile-friendly restart button
+  function restartGame() {
     resetGame();
     gameOverScreen.style.display = "none";
+  }
+
+  // Handle both click and touch events for restart button
+  restartBtn.addEventListener('click', restartGame);
+  restartBtn.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    restartGame();
+  });
+
+  // Prevent double events
+  restartBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
   });
 
   // Window resize handler
