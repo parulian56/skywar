@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Sky Fighter - Classic Aircraft Shooter</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
@@ -11,6 +11,7 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      touch-action: manipulation;
     }
 
     body {
@@ -19,14 +20,17 @@
       overflow: hidden;
       font-family: 'Orbitron', monospace;
       color: white;
+      height: 100vh;
+      width: 100vw;
     }
 
     #gameContainer {
       position: relative;
+      width: 100%;
+      height: 100%;
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
     }
 
     canvas {
@@ -38,6 +42,8 @@
         0 0 20px rgba(30, 58, 138, 0.5),
         inset 0 0 20px rgba(0, 0, 0, 0.2);
       border-radius: 10px;
+      max-width: 100%;
+      max-height: 100%;
     }
 
     #gameOverScreen {
@@ -57,12 +63,15 @@
       z-index: 10;
       display: none;
       backdrop-filter: blur(10px);
+      text-align: center;
+      padding: 20px;
     }
 
     #gameOverScreen div:first-child {
       color: #ff4444;
       text-shadow: 0 0 20px rgba(255, 68, 68, 0.8);
       animation: crashPulse 2s ease-in-out infinite;
+      font-size: 2rem;
     }
 
     #gameOverReason {
@@ -74,7 +83,7 @@
     #finalScoreCoins {
         font-size: 1.8rem;
         margin-top: 15px;
-        color: #FFD700; /* Gold color for coins */
+        color: #FFD700;
         text-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
     }
 
@@ -112,9 +121,9 @@
 
     #hud {
       position: absolute;
-      top: 20px;
-      left: 20px;
-      right: 20px;
+      top: 10px;
+      left: 10px;
+      right: 10px;
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
@@ -125,17 +134,17 @@
     #leftHUD {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 5px;
     }
 
     #score, #health, #ammo {
       font-family: 'Orbitron', monospace;
-      font-size: 18px;
+      font-size: 14px;
       font-weight: 700;
       text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
       background: rgba(0, 0, 0, 0.4);
-      padding: 8px 16px;
-      border-radius: 10px;
+      padding: 5px 10px;
+      border-radius: 8px;
       border: 2px solid rgba(255, 255, 255, 0.3);
     }
 
@@ -156,13 +165,13 @@
 
     #powerUpStatus {
       font-family: 'Orbitron', monospace;
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 700;
       color: #00ffff;
       text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
       background: rgba(0, 0, 0, 0.4);
-      padding: 8px 16px;
-      border-radius: 10px;
+      padding: 5px 10px;
+      border-radius: 8px;
       border: 2px solid rgba(0, 255, 255, 0.3);
       opacity: 0;
       transition: opacity 0.3s ease;
@@ -170,14 +179,15 @@
 
     #instructions {
       position: absolute;
-      bottom: 20px;
+      bottom: 10px;
       left: 50%;
       transform: translateX(-50%);
       font-family: 'Orbitron', monospace;
-      font-size: 14px;
+      font-size: 12px;
       color: rgba(255, 255, 255, 0.8);
       text-align: center;
       z-index: 5;
+      width: 90%;
     }
 
     .cloud {
@@ -213,6 +223,120 @@
         opacity: 0;
       }
     }
+
+    /* Mobile Controls */
+    #mobileControls {
+      position: absolute;
+      bottom: 60px;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 20px;
+      z-index: 5;
+      touch-action: none;
+    }
+
+    .control-btn {
+      width: 60px;
+      height: 60px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 24px;
+      user-select: none;
+      -webkit-user-select: none;
+      border: 2px solid rgba(255, 255, 255, 0.5);
+    }
+
+    #dpad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 5px;
+    }
+
+    .dpad-btn {
+      width: 40px;
+      height: 40px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 5px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 18px;
+      user-select: none;
+      -webkit-user-select: none;
+      border: 2px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .dpad-btn.up {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .dpad-btn.left {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    .dpad-btn.right {
+      grid-column: 3;
+      grid-row: 2;
+    }
+
+    .dpad-btn.down {
+      grid-column: 2;
+      grid-row: 3;
+    }
+
+    @media (max-width: 768px) {
+      #gameOverScreen div:first-child {
+        font-size: 1.8rem;
+      }
+      
+      #gameOverReason {
+        font-size: 1rem;
+      }
+      
+      #finalScoreCoins {
+        font-size: 1.4rem;
+      }
+      
+      #restartBtn {
+        padding: 12px 24px;
+        font-size: 1.1rem;
+      }
+      
+      #hud {
+        top: 5px;
+      }
+      
+      #score, #health, #ammo {
+        font-size: 12px;
+        padding: 4px 8px;
+      }
+      
+      #instructions {
+        font-size: 10px;
+        bottom: 5px;
+      }
+      
+      .control-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+      }
+      
+      .dpad-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 16px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -238,10 +362,20 @@
       <button id="restartBtn">Take Off Again</button>
     </div>
 
-    <canvas id="gameCanvas" width="600" height="800"></canvas>
+    <canvas id="gameCanvas"></canvas>
 
     <div id="instructions">
-      🎮 WASD or Arrow Keys to move • Auto-Fire enabled • Collect power-ups • Stop all enemies from passing!
+      🎮 Touch controls below • Auto-Fire enabled • Collect power-ups • Stop all enemies from passing!
+    </div>
+    
+    <!-- Mobile Controls -->
+    <div id="mobileControls">
+      <div id="dpad">
+        <div class="dpad-btn up" id="upBtn">↑</div>
+        <div class="dpad-btn left" id="leftBtn">←</div>
+        <div class="dpad-btn right" id="rightBtn">→</div>
+        <div class="dpad-btn down" id="downBtn">↓</div>
+      </div>
     </div>
   </div>
 
@@ -256,6 +390,31 @@
   const gameOverReason = document.getElementById('gameOverReason');
   const finalScoreCoinsEl = document.getElementById('finalScoreCoins');
   const restartBtn = document.getElementById('restartBtn');
+  
+  // Mobile control buttons
+  const upBtn = document.getElementById('upBtn');
+  const leftBtn = document.getElementById('leftBtn');
+  const rightBtn = document.getElementById('rightBtn');
+  const downBtn = document.getElementById('downBtn');
+
+  // Set canvas size based on window size
+  function resizeCanvas() {
+    const width = Math.min(window.innerWidth, 600);
+    const height = Math.min(window.innerHeight, 800);
+    
+    canvas.width = width;
+    canvas.height = height;
+    
+    // Adjust player position if game is running
+    if (player && gameRunning) {
+      player.x = Math.min(player.x, width - player.width);
+      player.y = Math.min(player.y, height - player.height);
+    }
+  }
+  
+  // Initial resize
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
 
   let player, bullets, enemies, keys, gameRunning, powerUps, particles, enemyBullets, boss;
   let score = 0;
@@ -268,13 +427,13 @@
   let enemySpawnIntervalId;
   let powerUpSpawnIntervalId;
   let bossActive = false;
-  let bossSpawned = false; // Flag to ensure boss only spawns once
-  const BOSS_SCORE_THRESHOLD = 5000; // Score at which the boss will appear
+  let bossSpawned = false;
+  const BOSS_SCORE_THRESHOLD = 2000; // Lower threshold for mobile
 
   function resetGame() {
     player = {
-      x: 280, 
-      y: 700, 
+      x: canvas.width / 2 - 20, 
+      y: canvas.height - 100, 
       width: 40, 
       height: 60, 
       speed: 7,
@@ -296,15 +455,15 @@
     gameOverType = '';
     bossActive = false;
     bossSpawned = false;
-    boss = null; // Reset boss object
+    boss = null;
     updateHUD();
     powerUpStatusEl.style.opacity = '0';
 
     // Clear existing intervals and set new ones
     clearInterval(enemySpawnIntervalId);
     clearInterval(powerUpSpawnIntervalId);
-    enemySpawnIntervalId = setInterval(spawnEnemy, 1800);
-    powerUpSpawnIntervalId = setInterval(spawnPowerUp, 12000);
+    enemySpawnIntervalId = setInterval(spawnEnemy, 1500); // Faster spawn for mobile
+    powerUpSpawnIntervalId = setInterval(spawnPowerUp, 10000); // More frequent power-ups
   }
 
   function updateHUD() {
@@ -313,10 +472,63 @@
     ammoEl.textContent = `Auto-Fire: ON`;
   }
 
+  // Keyboard controls
   document.addEventListener('keydown', (e) => {
     keys[e.code] = true;
   });
   document.addEventListener('keyup', (e) => keys[e.code] = false);
+
+  // Touch controls
+  function setupTouchControls() {
+    // Button press events
+    const handlePress = (direction) => {
+      keys[direction] = true;
+      return false; // Prevent default
+    };
+    
+    const handleRelease = (direction) => {
+      keys[direction] = false;
+      return false; // Prevent default
+    };
+    
+    // Up button
+    upBtn.addEventListener('touchstart', () => handlePress('ArrowUp'), {passive: false});
+    upBtn.addEventListener('touchend', () => handleRelease('ArrowUp'), {passive: false});
+    upBtn.addEventListener('mousedown', () => handlePress('ArrowUp'));
+    upBtn.addEventListener('mouseup', () => handleRelease('ArrowUp'));
+    upBtn.addEventListener('mouseleave', () => handleRelease('ArrowUp'));
+    
+    // Left button
+    leftBtn.addEventListener('touchstart', () => handlePress('ArrowLeft'), {passive: false});
+    leftBtn.addEventListener('touchend', () => handleRelease('ArrowLeft'), {passive: false});
+    leftBtn.addEventListener('mousedown', () => handlePress('ArrowLeft'));
+    leftBtn.addEventListener('mouseup', () => handleRelease('ArrowLeft'));
+    leftBtn.addEventListener('mouseleave', () => handleRelease('ArrowLeft'));
+    
+    // Right button
+    rightBtn.addEventListener('touchstart', () => handlePress('ArrowRight'), {passive: false});
+    rightBtn.addEventListener('touchend', () => handleRelease('ArrowRight'), {passive: false});
+    rightBtn.addEventListener('mousedown', () => handlePress('ArrowRight'));
+    rightBtn.addEventListener('mouseup', () => handleRelease('ArrowRight'));
+    rightBtn.addEventListener('mouseleave', () => handleRelease('ArrowRight'));
+    
+    // Down button
+    downBtn.addEventListener('touchstart', () => handlePress('ArrowDown'), {passive: false});
+    downBtn.addEventListener('touchend', () => handleRelease('ArrowDown'), {passive: false});
+    downBtn.addEventListener('mousedown', () => handlePress('ArrowDown'));
+    downBtn.addEventListener('mouseup', () => handleRelease('ArrowDown'));
+    downBtn.addEventListener('mouseleave', () => handleRelease('ArrowDown'));
+    
+    // Prevent scrolling when touching controls
+    document.addEventListener('touchmove', (e) => {
+      if (e.target.classList.contains('dpad-btn') || e.target.classList.contains('control-btn')) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+  }
+  
+  // Initialize touch controls
+  setupTouchControls();
 
   function autoShoot() {
     if (!gameRunning) return;
@@ -371,7 +583,6 @@
       type: enemyType,
       health: enemyType === 'fighter' ? 1 : 3,
       lastShot: 0,
-      // Shooting interval based on speed - faster enemies shoot more frequently
       shootInterval: Math.max(800, 2000 - (speed * 200))
     });
   }
@@ -449,24 +660,23 @@
     boss = {
         x: canvas.width / 2 - 75,
         y: -150, // Start above the screen
-        width: 150,
-        height: 100,
-        health: 50, // Boss health
-        maxHealth: 50,
+        width: 100, // Smaller boss for mobile
+        height: 70,
+        health: 30, // Less health for mobile
+        maxHealth: 30,
         speed: 1.5,
         targetY: 100, // Where the boss will stop
         movingDown: true,
         lastShot: 0,
-        shootInterval: 300, // Boss shoots frequently
+        shootInterval: 400, // Slower shooting for mobile
         bulletType: 'spread', // 'single', 'spread', 'barrage'
-        bulletSpeed: 5,
+        bulletSpeed: 4,
         phase: 1, // To control boss attack patterns
         lastMovementChange: 0,
         movementChangeInterval: 3000 // Change movement pattern every 3 seconds
     };
     bossActive = true;
     bossSpawned = true;
-    console.log("Boss spawned!");
   }
 
   function updateBoss() {
@@ -524,16 +734,14 @@
     // Change boss phase based on health
     if (boss.health <= boss.maxHealth * 0.5 && boss.phase < 2) {
         boss.phase = 2;
-        boss.shootInterval = 200; // Faster shooting
+        boss.shootInterval = 300; // Faster shooting
         boss.bulletType = 'spread';
-        boss.bulletSpeed = 7;
-        console.log("Boss Phase 2!");
+        boss.bulletSpeed = 5;
     } else if (boss.health <= boss.maxHealth * 0.2 && boss.phase < 3) {
         boss.phase = 3;
-        boss.shootInterval = 150; // Even faster shooting
-        boss.bulletType = 'spread'; // Or implement a 'barrage' type
-        boss.bulletSpeed = 9;
-        console.log("Boss Phase 3 - Enraged!");
+        boss.shootInterval = 200; // Even faster shooting
+        boss.bulletType = 'spread';
+        boss.bulletSpeed = 6;
     }
   }
 
@@ -545,19 +753,19 @@
 
     // Add some details to the boss (e.g., wings, turrets)
     ctx.fillStyle = '#DC143C';
-    ctx.fillRect(boss.x - 20, boss.y + 30, 40, 20); // Left wing
-    ctx.fillRect(boss.x + boss.width - 20, boss.y + 30, 40, 20); // Right wing
+    ctx.fillRect(boss.x - 15, boss.y + 20, 30, 15); // Left wing
+    ctx.fillRect(boss.x + boss.width - 15, boss.y + 20, 30, 15); // Right wing
 
     ctx.fillStyle = '#4B0082'; // Turret color
-    ctx.fillRect(boss.x + boss.width / 4 - 5, boss.y + boss.height - 15, 10, 15);
-    ctx.fillRect(boss.x + 3 * boss.width / 4 - 5, boss.y + boss.height - 15, 10, 15);
+    ctx.fillRect(boss.x + boss.width / 4 - 5, boss.y + boss.height - 10, 8, 10);
+    ctx.fillRect(boss.x + 3 * boss.width / 4 - 5, boss.y + boss.height - 10, 8, 10);
 
     // Health bar for the boss
     const healthBarWidth = boss.width * (boss.health / boss.maxHealth);
     ctx.fillStyle = '#00FF00'; // Green health bar
-    ctx.fillRect(boss.x, boss.y - 15, healthBarWidth, 10);
+    ctx.fillRect(boss.x, boss.y - 15, healthBarWidth, 8);
     ctx.strokeStyle = '#FFFFFF';
-    ctx.strokeRect(boss.x, boss.y - 15, boss.width, 10);
+    ctx.strokeRect(boss.x, boss.y - 15, boss.width, 8);
   }
 
   function update() {
@@ -705,7 +913,7 @@
             boss.health--;
             if (boss.health <= 0) {
                 createExplosion(boss.x + boss.width/2, boss.y + boss.height/2, 'large');
-                score += 10000; // Large score for defeating boss
+                score += 5000; // Large score for defeating boss
                 endGame('boss_defeated');
                 boss = null; // Remove boss
                 bossActive = false;
@@ -786,7 +994,7 @@
 
   function activateRapidFire() {
     rapidFire = true;
-    rapidFireTimer = 60 * 10; // 10 seconds
+    rapidFireTimer = 60 * 8; // 8 seconds for mobile
     powerUpStatusEl.style.opacity = '1';
   }
 
