@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Sky Fighter - Classic Aircraft Shooter</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
@@ -11,6 +11,7 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
@@ -19,6 +20,11 @@
       overflow: hidden;
       font-family: 'Orbitron', monospace;
       color: white;
+      touch-action: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
     }
 
     #gameContainer {
@@ -27,6 +33,7 @@
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      width: 100vw;
     }
 
     canvas {
@@ -38,6 +45,8 @@
         0 0 20px rgba(30, 58, 138, 0.5),
         inset 0 0 20px rgba(0, 0, 0, 0.2);
       border-radius: 10px;
+      max-width: 100vw;
+      max-height: 100vh;
     }
 
     #gameOverScreen {
@@ -53,29 +62,33 @@
       align-items: center;
       justify-content: center;
       font-family: 'Orbitron', monospace;
-      font-size: 2.5rem;
+      font-size: clamp(1.5rem, 5vw, 2.5rem);
       z-index: 10;
       display: none;
       backdrop-filter: blur(10px);
+      padding: 20px;
     }
 
     #gameOverScreen div:first-child {
       color: #ff4444;
       text-shadow: 0 0 20px rgba(255, 68, 68, 0.8);
       animation: crashPulse 2s ease-in-out infinite;
+      text-align: center;
     }
 
     #gameOverReason {
-      font-size: 1.2rem;
+      font-size: clamp(0.8rem, 3vw, 1.2rem);
       margin-top: 20px;
       color: #ffaa44;
+      text-align: center;
     }
 
     #finalScoreCoins {
-        font-size: 1.8rem;
+        font-size: clamp(1rem, 4vw, 1.8rem);
         margin-top: 15px;
-        color: #FFD700; /* Gold color for coins */
+        color: #FFD700;
         text-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+        text-align: center;
     }
 
     @keyframes crashPulse {
@@ -86,7 +99,7 @@
     #restartBtn {
       padding: 15px 30px;
       margin-top: 30px;
-      font-size: 1.3rem;
+      font-size: clamp(0.8rem, 3vw, 1.3rem);
       font-family: 'Orbitron', monospace;
       background: linear-gradient(45deg, #4CAF50, #45a049);
       border: none;
@@ -100,9 +113,10 @@
       box-shadow: 
         0 4px 15px rgba(76, 175, 80, 0.4),
         0 0 20px rgba(76, 175, 80, 0.2);
+      touch-action: manipulation;
     }
 
-    #restartBtn:hover {
+    #restartBtn:hover, #restartBtn:active {
       background: linear-gradient(45deg, #45a049, #4CAF50);
       transform: translateY(-2px);
       box-shadow: 
@@ -112,9 +126,9 @@
 
     #hud {
       position: absolute;
-      top: 20px;
-      left: 20px;
-      right: 20px;
+      top: 10px;
+      left: 10px;
+      right: 10px;
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
@@ -125,18 +139,19 @@
     #leftHUD {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 5px;
     }
 
     #score, #health, #ammo {
       font-family: 'Orbitron', monospace;
-      font-size: 18px;
+      font-size: clamp(10px, 3vw, 18px);
       font-weight: 700;
       text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
       background: rgba(0, 0, 0, 0.4);
-      padding: 8px 16px;
-      border-radius: 10px;
+      padding: 4px 8px;
+      border-radius: 8px;
       border: 2px solid rgba(255, 255, 255, 0.3);
+      white-space: nowrap;
     }
 
     #score {
@@ -156,28 +171,67 @@
 
     #powerUpStatus {
       font-family: 'Orbitron', monospace;
-      font-size: 16px;
+      font-size: clamp(10px, 2.5vw, 16px);
       font-weight: 700;
       color: #00ffff;
       text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
       background: rgba(0, 0, 0, 0.4);
-      padding: 8px 16px;
-      border-radius: 10px;
+      padding: 4px 8px;
+      border-radius: 8px;
       border: 2px solid rgba(0, 255, 255, 0.3);
       opacity: 0;
       transition: opacity 0.3s ease;
     }
 
+    #mobileControls {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: none;
+      z-index: 5;
+    }
+
+    #mobileControls.show {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .control-btn {
+      width: 50px;
+      height: 50px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      touch-action: manipulation;
+      user-select: none;
+    }
+
+    .control-btn:active {
+      background: rgba(255, 255, 255, 0.4);
+      transform: scale(0.95);
+    }
+
     #instructions {
       position: absolute;
-      bottom: 20px;
+      bottom: 10px;
       left: 50%;
       transform: translateX(-50%);
       font-family: 'Orbitron', monospace;
-      font-size: 14px;
+      font-size: clamp(8px, 2vw, 14px);
       color: rgba(255, 255, 255, 0.8);
       text-align: center;
       z-index: 5;
+      max-width: 90vw;
+      line-height: 1.2;
     }
 
     .cloud {
@@ -213,6 +267,40 @@
         opacity: 0;
       }
     }
+
+    /* Mobile landscape optimization */
+    @media screen and (orientation: landscape) and (max-height: 500px) {
+      #hud {
+        top: 5px;
+        left: 5px;
+        right: 5px;
+      }
+      
+      #leftHUD {
+        gap: 2px;
+      }
+      
+      #score, #health, #ammo {
+        padding: 2px 6px;
+        font-size: clamp(8px, 2.5vw, 14px);
+      }
+      
+      #instructions {
+        bottom: 5px;
+        font-size: clamp(6px, 1.5vw, 10px);
+      }
+    }
+
+    /* Touch feedback */
+    @media (hover: none) and (pointer: coarse) {
+      #mobileControls.show {
+        display: flex;
+      }
+      
+      #instructions {
+        display: none;
+      }
+    }
   </style>
 </head>
 <body>
@@ -238,10 +326,17 @@
       <button id="restartBtn">Take Off Again</button>
     </div>
 
-    <canvas id="gameCanvas" width="600" height="800"></canvas>
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="mobileControls">
+      <div class="control-btn" id="leftBtn">←</div>
+      <div class="control-btn" id="upBtn">↑</div>
+      <div class="control-btn" id="downBtn">↓</div>
+      <div class="control-btn" id="rightBtn">→</div>
+    </div>
 
     <div id="instructions">
-      🎮 WASD or Arrow Keys to move • Auto-Fire enabled • Collect power-ups • Stop all enemies from passing!
+      🎮 WASD/Arrow Keys or Touch Controls • Auto-Fire enabled • Collect power-ups • Stop all enemies!
     </div>
   </div>
 
@@ -256,6 +351,13 @@
   const gameOverReason = document.getElementById('gameOverReason');
   const finalScoreCoinsEl = document.getElementById('finalScoreCoins');
   const restartBtn = document.getElementById('restartBtn');
+  const mobileControls = document.getElementById('mobileControls');
+
+  // Mobile control buttons
+  const leftBtn = document.getElementById('leftBtn');
+  const rightBtn = document.getElementById('rightBtn');
+  const upBtn = document.getElementById('upBtn');
+  const downBtn = document.getElementById('downBtn');
 
   let player, bullets, enemies, keys, gameRunning, powerUps, particles, enemyBullets, boss;
   let score = 0;
@@ -268,16 +370,60 @@
   let enemySpawnIntervalId;
   let powerUpSpawnIntervalId;
   let bossActive = false;
-  let bossSpawned = false; // Flag to ensure boss only spawns once
-  const BOSS_SCORE_THRESHOLD = 5000; // Score at which the boss will appear
+  let bossSpawned = false;
+  const BOSS_SCORE_THRESHOLD = 5000;
+
+  // Mobile touch variables
+  let isMobile = false;
+  let touchStartX = 0;
+  let touchStartY = 0;
+
+  // Detect mobile device
+  function detectMobile() {
+    isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+               ('ontouchstart' in window) || 
+               (navigator.maxTouchPoints > 0);
+    
+    if (isMobile) {
+      mobileControls.classList.add('show');
+    }
+  }
+
+  // Responsive canvas sizing
+  function resizeCanvas() {
+    const container = document.getElementById('gameContainer');
+    const maxWidth = Math.min(window.innerWidth - 20, 600);
+    const maxHeight = Math.min(window.innerHeight - 20, 800);
+    
+    // Maintain aspect ratio
+    const aspectRatio = 600 / 800;
+    let canvasWidth, canvasHeight;
+    
+    if (maxWidth / maxHeight > aspectRatio) {
+      canvasHeight = maxHeight;
+      canvasWidth = maxHeight * aspectRatio;
+    } else {
+      canvasWidth = maxWidth;
+      canvasHeight = maxWidth / aspectRatio;
+    }
+    
+    canvas.width = Math.floor(canvasWidth);
+    canvas.height = Math.floor(canvasHeight);
+    
+    // Adjust game scale for smaller screens
+    if (canvas.width < 400) {
+      ctx.imageSmoothingEnabled = false;
+    }
+  }
 
   function resetGame() {
+    const canvasRect = canvas.getBoundingClientRect();
     player = {
-      x: 280, 
-      y: 700, 
-      width: 40, 
-      height: 60, 
-      speed: 7,
+      x: canvas.width * 0.45, 
+      y: canvas.height * 0.85, 
+      width: Math.max(30, canvas.width * 0.06), 
+      height: Math.max(45, canvas.height * 0.06), 
+      speed: Math.max(4, canvas.width * 0.01),
       angle: 0,
       trail: []
     };
@@ -296,11 +442,10 @@
     gameOverType = '';
     bossActive = false;
     bossSpawned = false;
-    boss = null; // Reset boss object
+    boss = null;
     updateHUD();
     powerUpStatusEl.style.opacity = '0';
 
-    // Clear existing intervals and set new ones
     clearInterval(enemySpawnIntervalId);
     clearInterval(powerUpSpawnIntervalId);
     enemySpawnIntervalId = setInterval(spawnEnemy, 1800);
@@ -313,26 +458,94 @@
     ammoEl.textContent = `Auto-Fire: ON`;
   }
 
+  // Keyboard controls
   document.addEventListener('keydown', (e) => {
     keys[e.code] = true;
+    e.preventDefault();
   });
-  document.addEventListener('keyup', (e) => keys[e.code] = false);
+  document.addEventListener('keyup', (e) => {
+    keys[e.code] = false;
+    e.preventDefault();
+  });
+
+  // Touch controls for mobile
+  function setupMobileControls() {
+    // Touch control buttons
+    leftBtn.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      keys['ArrowLeft'] = true;
+    });
+    leftBtn.addEventListener('touchend', () => keys['ArrowLeft'] = false);
+
+    rightBtn.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      keys['ArrowRight'] = true;
+    });
+    rightBtn.addEventListener('touchend', () => keys['ArrowRight'] = false);
+
+    upBtn.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      keys['ArrowUp'] = true;
+    });
+    upBtn.addEventListener('touchend', () => keys['ArrowUp'] = false);
+
+    downBtn.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      keys['ArrowDown'] = true;
+    });
+    downBtn.addEventListener('touchend', () => keys['ArrowDown'] = false);
+
+    // Touch screen movement (swipe)
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      touchStartX = touch.clientX - rect.left;
+      touchStartY = touch.clientY - rect.top;
+    });
+
+    canvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      if (!gameRunning) return;
+      
+      const touch = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      const touchX = touch.clientX - rect.left;
+      const touchY = touch.clientY - rect.top;
+      
+      // Convert touch coordinates to canvas coordinates
+      const canvasX = (touchX / rect.width) * canvas.width;
+      const canvasY = (touchY / rect.height) * canvas.height;
+      
+      // Move player towards touch position
+      const targetX = canvasX - player.width / 2;
+      const targetY = canvasY - player.height / 2;
+      
+      player.x = Math.max(0, Math.min(canvas.width - player.width, targetX));
+      player.y = Math.max(0, Math.min(canvas.height - player.height, targetY));
+    });
+
+    canvas.addEventListener('touchend', (e) => {
+      e.preventDefault();
+    });
+  }
 
   function autoShoot() {
     if (!gameRunning) return;
     
     const now = Date.now();
-    const fireRate = rapidFire ? 100 : 150; // Faster auto-fire rate
+    const fireRate = rapidFire ? 100 : 150;
     
     if (now - lastShot < fireRate) return;
     lastShot = now;
 
+    const bulletSize = Math.max(3, canvas.width * 0.006);
     bullets.push({
-      x: player.x + player.width / 2 - 2,
+      x: player.x + player.width / 2 - bulletSize / 2,
       y: player.y,
-      width: 4,
-      height: 12,
-      speed: 12,
+      width: bulletSize,
+      height: bulletSize * 3,
+      speed: Math.max(8, canvas.height * 0.015),
       trail: []
     });
 
@@ -340,52 +553,61 @@
       bullets.push({
         x: player.x + 5,
         y: player.y + 10,
-        width: 4,
-        height: 12,
-        speed: 12,
+        width: bulletSize,
+        height: bulletSize * 3,
+        speed: Math.max(8, canvas.height * 0.015),
         trail: []
       });
       bullets.push({
         x: player.x + player.width - 9,
         y: player.y + 10,
-        width: 4,
-        height: 12,
-        speed: 12,
+        width: bulletSize,
+        height: bulletSize * 3,
+        speed: Math.max(8, canvas.height * 0.015),
         trail: []
       });
     }
   }
 
   function spawnEnemy() {
-    if (!gameRunning || bossActive) return; // Don't spawn regular enemies if boss is active
+    if (!gameRunning || bossActive) return;
     const x = Math.random() * (canvas.width - 50);
     const enemyType = Math.random() < 0.7 ? 'fighter' : 'bomber';
-    const speed = enemyType === 'fighter' ? 2 + Math.random() * 3 : 1 + Math.random() * 2;
+    const speed = enemyType === 'fighter' ? 
+      Math.max(1.5, canvas.height * 0.003) + Math.random() * 2 : 
+      Math.max(1, canvas.height * 0.002) + Math.random() * 1.5;
+    
+    const enemyWidth = enemyType === 'fighter' ? 
+      Math.max(25, canvas.width * 0.05) : 
+      Math.max(35, canvas.width * 0.07);
+    const enemyHeight = enemyType === 'fighter' ? 
+      Math.max(35, canvas.height * 0.045) : 
+      Math.max(45, canvas.height * 0.06);
     
     enemies.push({ 
       x, 
-      y: -60, 
-      width: enemyType === 'fighter' ? 35 : 50,
-      height: enemyType === 'fighter' ? 45 : 60,
+      y: -enemyHeight, 
+      width: enemyWidth,
+      height: enemyHeight,
       speed: speed,
       type: enemyType,
       health: enemyType === 'fighter' ? 1 : 3,
       lastShot: 0,
-      // Shooting interval based on speed - faster enemies shoot more frequently
       shootInterval: Math.max(800, 2000 - (speed * 200))
     });
   }
 
   function spawnPowerUp() {
     if (!gameRunning) return;
-    const x = Math.random() * (canvas.width - 30);
+    const powerUpSize = Math.max(20, canvas.width * 0.04);
+    const x = Math.random() * (canvas.width - powerUpSize);
     powerUps.push({ 
       x, 
-      y: -30, 
-      width: 30, 
-      height: 30, 
+      y: -powerUpSize, 
+      width: powerUpSize, 
+      height: powerUpSize, 
       rotation: 0,
-      speed: 2,
+      speed: Math.max(1.5, canvas.height * 0.0025),
       type: Math.random() < 0.6 ? 'rapidfire' : 'health'
     });
   }
@@ -400,23 +622,10 @@
         vy: (Math.random() - 0.5) * 12,
         life: 40,
         maxLife: 40,
-        size: size === 'large' ? 4 : 2,
+        size: size === 'large' ? Math.max(3, canvas.width * 0.006) : Math.max(2, canvas.width * 0.004),
         color: `hsl(${Math.random() * 60}, 100%, 50%)`
       });
     }
-    
-    // Create explosion element
-    const explosion = document.createElement('div');
-    explosion.className = 'explosion';
-    explosion.style.left = x + 'px';
-    explosion.style.top = y + 'px';
-    document.body.appendChild(explosion);
-    
-    setTimeout(() => {
-      if (document.body.contains(explosion)) {
-        document.body.removeChild(explosion);
-      }
-    }, 500);
   }
 
   function endGame(reason) {
@@ -428,51 +637,50 @@
     } else if (reason === 'player_destroyed') {
       gameOverReason.textContent = 'Your aircraft was destroyed!';
     } else if (reason === 'boss_defeated') {
-        gameOverReason.textContent = 'Boss defeated! You are a true Sky Fighter!';
+      gameOverReason.textContent = 'Boss defeated! You are a true Sky Fighter!';
     }
     
-    finalScoreCoinsEl.textContent = `Coins Collected: ${Math.floor(score / 10)}`; // 10 score = 1 coin
+    finalScoreCoinsEl.textContent = `Coins Collected: ${Math.floor(score / 10)}`;
     gameOverScreen.style.display = "flex";
     createExplosion(player.x + player.width/2, player.y + player.height/2, 'large');
 
-    // Stop all enemy and power-up spawning
     clearInterval(enemySpawnIntervalId);
     clearInterval(powerUpSpawnIntervalId);
   }
 
   function spawnBoss() {
-    if (bossSpawned || !gameRunning) return; // Only spawn boss once
+    if (bossSpawned || !gameRunning) return;
 
-    // Stop regular enemy spawning
     clearInterval(enemySpawnIntervalId); 
 
+    const bossWidth = Math.max(100, canvas.width * 0.25);
+    const bossHeight = Math.max(70, canvas.height * 0.1);
+
     boss = {
-        x: canvas.width / 2 - 75,
-        y: -150, // Start above the screen
-        width: 150,
-        height: 100,
-        health: 50, // Boss health
+        x: canvas.width / 2 - bossWidth / 2,
+        y: -bossHeight - 20,
+        width: bossWidth,
+        height: bossHeight,
+        health: 50,
         maxHealth: 50,
-        speed: 1.5,
-        targetY: 100, // Where the boss will stop
+        speed: Math.max(1, canvas.height * 0.002),
+        targetY: canvas.height * 0.12,
         movingDown: true,
         lastShot: 0,
-        shootInterval: 300, // Boss shoots frequently
-        bulletType: 'spread', // 'single', 'spread', 'barrage'
-        bulletSpeed: 5,
-        phase: 1, // To control boss attack patterns
+        shootInterval: 300,
+        bulletType: 'spread',
+        bulletSpeed: Math.max(3, canvas.height * 0.006),
+        phase: 1,
         lastMovementChange: 0,
-        movementChangeInterval: 3000 // Change movement pattern every 3 seconds
+        movementChangeInterval: 3000
     };
     bossActive = true;
     bossSpawned = true;
-    console.log("Boss spawned!");
   }
 
   function updateBoss() {
     if (!boss || !gameRunning) return;
 
-    // Movement
     if (boss.movingDown) {
         boss.y += boss.speed;
         if (boss.y >= boss.targetY) {
@@ -483,91 +691,61 @@
         const now = Date.now();
         if (now - boss.lastMovementChange > boss.movementChangeInterval) {
             boss.lastMovementChange = now;
-            // Randomly move left or right
             boss.speed = (Math.random() > 0.5 ? 1 : -1) * (1 + Math.random() * 2);
-            boss.targetY = 100 + Math.random() * 50; // Slightly vary Y
+            boss.targetY = canvas.height * 0.12 + Math.random() * (canvas.height * 0.06);
         }
         boss.x += boss.speed;
-        // Keep boss within horizontal bounds
         if (boss.x <= 0 || boss.x + boss.width >= canvas.width) {
-            boss.speed *= -1; // Reverse direction
+            boss.speed *= -1;
         }
     }
 
-    // Boss shooting
     const now = Date.now();
     if (now - boss.lastShot > boss.shootInterval) {
         boss.lastShot = now;
+        const bulletSize = Math.max(4, canvas.width * 0.008);
+        
         if (boss.bulletType === 'single') {
             enemyBullets.push({
-                x: boss.x + boss.width / 2 - 2,
+                x: boss.x + boss.width / 2 - bulletSize / 2,
                 y: boss.y + boss.height,
-                width: 6,
-                height: 12,
+                width: bulletSize,
+                height: bulletSize * 2,
                 speed: boss.bulletSpeed
             });
         } else if (boss.bulletType === 'spread') {
-            // Shoot 3 bullets in a spread
             for (let i = -1; i <= 1; i++) {
                 enemyBullets.push({
-                    x: boss.x + boss.width / 2 - 2 + (i * 15),
+                    x: boss.x + boss.width / 2 - bulletSize / 2 + (i * boss.width * 0.2),
                     y: boss.y + boss.height,
-                    width: 6,
-                    height: 12,
+                    width: bulletSize,
+                    height: bulletSize * 2,
                     speed: boss.bulletSpeed,
-                    vx: i * 0.5 // Slight horizontal movement for spread
+                    vx: i * 0.5
                 });
             }
         }
     }
 
-    // Change boss phase based on health
     if (boss.health <= boss.maxHealth * 0.5 && boss.phase < 2) {
         boss.phase = 2;
-        boss.shootInterval = 200; // Faster shooting
+        boss.shootInterval = 200;
         boss.bulletType = 'spread';
-        boss.bulletSpeed = 7;
-        console.log("Boss Phase 2!");
+        boss.bulletSpeed = Math.max(5, canvas.height * 0.008);
     } else if (boss.health <= boss.maxHealth * 0.2 && boss.phase < 3) {
         boss.phase = 3;
-        boss.shootInterval = 150; // Even faster shooting
-        boss.bulletType = 'spread'; // Or implement a 'barrage' type
-        boss.bulletSpeed = 9;
-        console.log("Boss Phase 3 - Enraged!");
+        boss.shootInterval = 150;
+        boss.bulletType = 'spread';
+        boss.bulletSpeed = Math.max(7, canvas.height * 0.01);
     }
-  }
-
-  function drawBoss() {
-    if (!boss) return;
-
-    ctx.fillStyle = '#8B0000'; // Dark red for boss
-    ctx.fillRect(boss.x, boss.y, boss.width, boss.height);
-
-    // Add some details to the boss (e.g., wings, turrets)
-    ctx.fillStyle = '#DC143C';
-    ctx.fillRect(boss.x - 20, boss.y + 30, 40, 20); // Left wing
-    ctx.fillRect(boss.x + boss.width - 20, boss.y + 30, 40, 20); // Right wing
-
-    ctx.fillStyle = '#4B0082'; // Turret color
-    ctx.fillRect(boss.x + boss.width / 4 - 5, boss.y + boss.height - 15, 10, 15);
-    ctx.fillRect(boss.x + 3 * boss.width / 4 - 5, boss.y + boss.height - 15, 10, 15);
-
-    // Health bar for the boss
-    const healthBarWidth = boss.width * (boss.health / boss.maxHealth);
-    ctx.fillStyle = '#00FF00'; // Green health bar
-    ctx.fillRect(boss.x, boss.y - 15, healthBarWidth, 10);
-    ctx.strokeStyle = '#FFFFFF';
-    ctx.strokeRect(boss.x, boss.y - 15, boss.width, 10);
   }
 
   function update() {
     if (!gameRunning) return;
 
-    // Background scrolling
     backgroundY += 1;
     if (backgroundY >= canvas.height) backgroundY = 0;
 
-    // Auto-shoot
     autoShoot();
 
     // Player movement
@@ -580,10 +758,9 @@
       player.angle = 0.2;
     }
     if (!(keys['ArrowLeft'] || keys['KeyA'] || keys['ArrowRight'] || keys['KeyD'])) {
-      player.angle *= 0.9; // Return angle if not pressing left/right
+      player.angle *= 0.9;
     }
 
-    // Up-down movement
     if (keys['ArrowUp'] || keys['KeyW']) {
       player.y -= player.speed;
     }
@@ -591,15 +768,13 @@
       player.y += player.speed;
     }
 
-    // Clamp player position
     player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
     player.y = Math.max(0, Math.min(canvas.height - player.height, player.y));
 
-    // Player trail
     player.trail.push({ x: player.x + player.width/2, y: player.y + player.height });
     if (player.trail.length > 8) player.trail.shift();
 
-    // Bullets
+    // Update bullets
     bullets.forEach((b, i) => {
       b.trail.push({ x: b.x + b.width/2, y: b.y + b.height/2 });
       if (b.trail.length > 5) b.trail.shift();
@@ -608,38 +783,36 @@
       if (b.y < 0) bullets.splice(i, 1);
     });
 
-    // Enemy bullets
+    // Update enemy bullets
     enemyBullets.forEach((b, i) => {
       b.y += b.speed;
-      if (b.vx) b.x += b.vx; // Apply horizontal movement for spread bullets
+      if (b.vx) b.x += b.vx;
       if (b.y > canvas.height || b.x < 0 || b.x > canvas.width) enemyBullets.splice(i, 1);
     });
 
-    // Enemies (regular)
+    // Update enemies
     enemies.forEach((e, i) => {
       e.y += e.speed;
       
-      // Check if enemy passed the screen (game over condition)
       if (e.y > canvas.height + 50) {
         endGame('enemy_passed');
         return;
       }
       
-      // Enemy shooting with speed-based interval
       const now = Date.now();
       if (now - e.lastShot > e.shootInterval && e.y > 0 && e.y < canvas.height - 100) {
         e.lastShot = now;
         
-        // Faster enemies shoot more bullets
         const bulletCount = e.speed > 4 ? 2 : 1;
+        const bulletSize = Math.max(3, canvas.width * 0.005);
         
         for (let j = 0; j < bulletCount; j++) {
           enemyBullets.push({
-            x: e.x + e.width / 2 - 2 + (j * 10 - 5),
+            x: e.x + e.width / 2 - bulletSize / 2 + (j * 10 - 5),
             y: e.y + e.height,
-            width: 4,
-            height: 8,
-            speed: 3 + e.speed * 0.5 // Bullet speed based on enemy speed
+            width: bulletSize,
+            height: bulletSize * 2,
+            speed: Math.max(2, canvas.height * 0.004) + e.speed * 0.5
           });
         }
       }
@@ -653,14 +826,14 @@
         updateBoss();
     }
 
-    // Power-ups
+    // Update power-ups
     powerUps.forEach((p, i) => {
       p.y += p.speed;
       p.rotation += 0.1;
       if (p.y > canvas.height) powerUps.splice(i, 1);
     });
 
-    // Particles
+    // Update particles
     particles.forEach((p, i) => {
       p.x += p.vx;
       p.y += p.vy;
@@ -670,9 +843,8 @@
       if (p.life <= 0) particles.splice(i, 1);
     });
 
-    // Player bullets vs enemies
+    // Collision detection - Player bullets vs enemies
     bullets.forEach((b, bi) => {
-      // Check for collision with regular enemies
       enemies.forEach((e, ei) => {
         if (
           b.x < e.x + e.width &&
@@ -693,7 +865,7 @@
         }
       });
 
-      // Check for collision with boss
+      // Player bullets vs boss
       if (bossActive && boss) {
           if (
             b.x < boss.x + boss.width &&
@@ -701,13 +873,13 @@
             b.y < boss.y + boss.height &&
             b.y + b.height > boss.y
           ) {
-            bullets.splice(bi, 1); // Remove bullet
+            bullets.splice(bi, 1);
             boss.health--;
             if (boss.health <= 0) {
                 createExplosion(boss.x + boss.width/2, boss.y + boss.height/2, 'large');
-                score += 10000; // Large score for defeating boss
+                score += 10000;
                 endGame('boss_defeated');
-                boss = null; // Remove boss
+                boss = null;
                 bossActive = false;
             }
             updateHUD();
@@ -755,7 +927,7 @@
       }
     });
 
-    // Enemies vs player (collision)
+    // Enemies vs player collision
     enemies.forEach((e, i) => {
       if (
         e.x < player.x + player.width &&
@@ -786,12 +958,11 @@
 
   function activateRapidFire() {
     rapidFire = true;
-    rapidFireTimer = 60 * 10; // 10 seconds
+    rapidFireTimer = 60 * 10;
     powerUpStatusEl.style.opacity = '1';
   }
 
   function drawBackground() {
-    // Sky gradient
     const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
     gradient.addColorStop(0, '#87CEEB');
     gradient.addColorStop(0.5, '#4682B4');
@@ -799,12 +970,11 @@
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Moving clouds effect
     ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
     for (let i = 0; i < 3; i++) {
-      const y = (backgroundY + i * 200) % (canvas.height + 100);
-      ctx.fillRect(50 + i * 150, y, 80, 30);
-      ctx.fillRect(200 + i * 120, y + 50, 100, 40);
+      const y = (backgroundY + i * (canvas.height * 0.25)) % (canvas.height + 100);
+      ctx.fillRect(canvas.width * 0.08 + i * (canvas.width * 0.25), y, canvas.width * 0.13, canvas.height * 0.04);
+      ctx.fillRect(canvas.width * 0.33 + i * (canvas.width * 0.2), y + canvas.height * 0.06, canvas.width * 0.17, canvas.height * 0.05);
     }
   }
 
@@ -817,8 +987,8 @@
     ctx.globalAlpha = 0.6;
     player.trail.forEach((t, i) => {
       ctx.fillStyle = `hsl(${30 + i * 10}, 100%, 60%)`;
-      const size = (i / player.trail.length) * 6;
-      ctx.fillRect(-size/2, 20, size, 8);
+      const size = (i / player.trail.length) * (player.width * 0.15);
+      ctx.fillRect(-size/2, player.height * 0.33, size, player.height * 0.13);
     });
     ctx.globalAlpha = 1;
 
@@ -828,16 +998,16 @@
     
     // Aircraft wings
     ctx.fillStyle = '#1E90FF';
-    ctx.fillRect(-player.width/2 - 10, -5, 20, 10);
-    ctx.fillRect(player.width/2 - 10, -5, 20, 10);
+    ctx.fillRect(-player.width/2 - player.width * 0.25, -player.height * 0.08, player.width * 0.5, player.height * 0.17);
+    ctx.fillRect(player.width/2 - player.width * 0.25, -player.height * 0.08, player.width * 0.5, player.height * 0.17);
     
     // Cockpit
     ctx.fillStyle = '#000080';
-    ctx.fillRect(-8, -player.height/2 + 10, 16, 20);
+    ctx.fillRect(-player.width * 0.2, -player.height/2 + player.height * 0.17, player.width * 0.4, player.height * 0.33);
     
     // Propeller
     ctx.fillStyle = '#A0A0A0';
-    ctx.fillRect(-2, -player.height/2 - 5, 4, 8);
+    ctx.fillRect(-player.width * 0.05, -player.height/2 - player.height * 0.08, player.width * 0.1, player.height * 0.13);
 
     ctx.restore();
   }
@@ -882,12 +1052,12 @@
         
         // Wings
         ctx.fillStyle = '#B22222';
-        ctx.fillRect(e.x - 8, e.y + 15, 16, 8);
-        ctx.fillRect(e.x + e.width - 8, e.y + 15, 16, 8);
+        ctx.fillRect(e.x - e.width * 0.23, e.y + e.height * 0.33, e.width * 0.46, e.height * 0.18);
+        ctx.fillRect(e.x + e.width - e.width * 0.23, e.y + e.height * 0.33, e.width * 0.46, e.height * 0.18);
         
         // Cockpit
         ctx.fillStyle = '#8B0000';
-        ctx.fillRect(e.x + 12, e.y + 10, 12, 15);
+        ctx.fillRect(e.x + e.width * 0.34, e.y + e.height * 0.22, e.width * 0.32, e.height * 0.33);
       } else {
         // Bomber aircraft
         ctx.fillStyle = '#8B4513';
@@ -895,14 +1065,38 @@
         
         // Wings
         ctx.fillStyle = '#A0522D';
-        ctx.fillRect(e.x - 12, e.y + 20, 24, 12);
-        ctx.fillRect(e.x + e.width - 12, e.y + 20, 24, 12);
+        ctx.fillRect(e.x - e.width * 0.24, e.y + e.height * 0.33, e.width * 0.48, e.height * 0.2);
+        ctx.fillRect(e.x + e.width - e.width * 0.24, e.y + e.height * 0.33, e.width * 0.48, e.height * 0.2);
         
         // Cockpit
         ctx.fillStyle = '#654321';
-        ctx.fillRect(e.x + 18, e.y + 15, 14, 20);
+        ctx.fillRect(e.x + e.width * 0.36, e.y + e.height * 0.25, e.width * 0.28, e.height * 0.33);
       }
     });
+  }
+
+  function drawBoss() {
+    if (!boss) return;
+
+    ctx.fillStyle = '#8B0000';
+    ctx.fillRect(boss.x, boss.y, boss.width, boss.height);
+
+    // Boss wings
+    ctx.fillStyle = '#DC143C';
+    ctx.fillRect(boss.x - boss.width * 0.13, boss.y + boss.height * 0.3, boss.width * 0.27, boss.height * 0.2);
+    ctx.fillRect(boss.x + boss.width - boss.width * 0.13, boss.y + boss.height * 0.3, boss.width * 0.27, boss.height * 0.2);
+
+    // Boss turrets
+    ctx.fillStyle = '#4B0082';
+    ctx.fillRect(boss.x + boss.width / 4 - boss.width * 0.033, boss.y + boss.height - boss.height * 0.15, boss.width * 0.067, boss.height * 0.15);
+    ctx.fillRect(boss.x + 3 * boss.width / 4 - boss.width * 0.033, boss.y + boss.height - boss.height * 0.15, boss.width * 0.067, boss.height * 0.15);
+
+    // Boss health bar
+    const healthBarWidth = boss.width * (boss.health / boss.maxHealth);
+    ctx.fillStyle = '#00FF00';
+    ctx.fillRect(boss.x, boss.y - 15, healthBarWidth, 10);
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.strokeRect(boss.x, boss.y - 15, boss.width, 10);
   }
 
   function drawPowerUps() {
@@ -918,9 +1112,9 @@
         ctx.fillRect(-p.width/2, -p.height/2, p.width, p.height);
         
         ctx.fillStyle = '#FFFFFF';
-        ctx.font = '16px Arial';
+        ctx.font = `${Math.max(12, p.width * 0.5)}px Arial`;
         ctx.textAlign = 'center';
-        ctx.fillText('R', 0, 5);
+        ctx.fillText('R', 0, p.height * 0.15);
       } else {
         ctx.fillStyle = '#32CD32';
         ctx.shadowColor = '#32CD32';
@@ -928,9 +1122,9 @@
         ctx.fillRect(-p.width/2, -p.height/2, p.width, p.height);
         
         ctx.fillStyle = '#FFFFFF';
-        ctx.font = '16px Arial';
+        ctx.font = `${Math.max(12, p.width * 0.5)}px Arial`;
         ctx.textAlign = 'center';
-        ctx.fillText('+', 0, 5);
+        ctx.fillText('+', 0, p.height * 0.15);
       }
       
       ctx.restore();
@@ -953,7 +1147,7 @@
     drawBullets();
     drawEnemyBullets();
     drawEnemies();
-    drawBoss(); // Draw the boss if it exists
+    drawBoss();
     drawPowerUps();
     drawParticles();
   }
@@ -964,12 +1158,42 @@
     requestAnimationFrame(gameLoop);
   }
 
+  // Event listeners
   restartBtn.addEventListener('click', () => {
     resetGame();
     gameOverScreen.style.display = "none";
   });
 
+  // Window resize handler
+  window.addEventListener('resize', () => {
+    resizeCanvas();
+    if (gameRunning) {
+      // Adjust player position proportionally
+      const oldCanvasWidth = canvas.width;
+      const oldCanvasHeight = canvas.height;
+      resizeCanvas();
+      
+      if (player) {
+        player.x = (player.x / oldCanvasWidth) * canvas.width;
+        player.y = (player.y / oldCanvasHeight) * canvas.height;
+      }
+    }
+  });
+
+  // Prevent scrolling on mobile
+  document.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+  }, { passive: false });
+
+  // Prevent zoom on double tap
+  document.addEventListener('touchend', (e) => {
+    e.preventDefault();
+  });
+
   // Initialize game
+  detectMobile();
+  resizeCanvas();
+  setupMobileControls();
   resetGame();
   gameLoop();
 </script>
